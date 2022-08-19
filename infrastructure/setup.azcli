@@ -1,0 +1,23 @@
+PREFIX=anbossar
+L=westeurope
+RG=$PREFIX-perfecto
+ACR=anbossar
+CONTAINERAPPS_ENVIRONMENT="$PREFIX-environment"
+CONTAINERAPP=perfect-frontend
+az group create -n $RG -l $L
+
+
+az acr login -n $ACR
+az acr build --registry $ACR --image ${CONTAINERAPP}:latest .
+
+az containerapp env create \
+  --name $CONTAINERAPPS_ENVIRONMENT \
+  --resource-group $RG \
+  --location $L
+
+az containerapp create \
+  --name $CONTAINERAPP \
+  --resource-group $RG \
+  --image anbossar.azurecr.io/${CONTAINERAPP}:latest \
+  --environment $CONTAINERAPPS_ENVIRONMENT \
+  --query properties.configuration.ingress.fqdn
